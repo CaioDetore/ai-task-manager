@@ -73,7 +73,7 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "ActDive Proposals",
           url: "#",
         },
         {
