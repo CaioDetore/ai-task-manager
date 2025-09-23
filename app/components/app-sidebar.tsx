@@ -50,6 +50,11 @@ const data = {
       icon: IconListCheck,
     },
     {
+      title: "Users",
+      url: "users",
+      icon: IconUsers,
+    },
+    {
       title: "Analytics",
       url: "#",
       icon: IconChartBar,

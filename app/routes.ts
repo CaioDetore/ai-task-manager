@@ -5,6 +5,7 @@ export default [
     index("routes/dashboard.tsx"),
     route("tasks", "routes/tasks.tsx"),
     route("task/new", "routes/task-new.tsx"),
-    route("task/edit/:id", "routes/task-edit.tsx")
+    route("task/edit/:id", "routes/task-edit.tsx"),
+    route("users", "routes/users.tsx")
   ])
 ] satisfies RouteConfig;
