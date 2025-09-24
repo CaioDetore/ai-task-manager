@@ -1,4 +1,4 @@
-"use client"
+
 
 import {
   IconDots,
@@ -7,6 +7,7 @@ import {
   IconTrash,
   type Icon,
 } from "@tabler/icons-react"
+import type { LucideIcon } from "lucide-react"
 
 import {
   DropdownMenu,
@@ -31,7 +32,7 @@ export function NavDocuments({
   items: {
     name: string
     url: string
-    icon: Icon
+    icon: Icon | LucideIcon
   }[]
 }) {
   const { isMobile } = useSidebar()

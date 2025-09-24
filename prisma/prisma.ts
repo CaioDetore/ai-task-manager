@@ -2,6 +2,8 @@ import { PrismaLibSQL } from "@prisma/adapter-libsql";
 import { PrismaClient } from "../app/generated/prisma/client.js";
 import { withAccelerate } from '@prisma/extension-accelerate'
 
+import "dotenv/config"
+
 const adapter = new PrismaLibSQL({
   url: `${process.env.TURSO_DATABASE_URL}`,
   authToken: `${process.env.TURSO_AUTH_TOKEN}`,
