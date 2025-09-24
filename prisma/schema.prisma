@@ -34,3 +34,20 @@ model Post {
 
   @@map("posts")
 }
+
+model Task {
+  id                        String   @id @default(uuid())
+  title                     String
+  description              String
+  steps                    String?   // Will store as JSON string
+  estimated_time           String
+  implementation_suggestion String?
+  acceptance_criteria      String?   // Will store as JSON string
+  suggested_tests         String?   // Will store as JSON string
+  content                 String?  // Combined markdown version
+  chat_history            String?  // Will store as JSON string
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  @@map("tasks")
+}

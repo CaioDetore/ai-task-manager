@@ -1,12 +1,10 @@
-import { turso } from "~/tursor"
 import type { Route } from "./+types/users"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/table"
+import prisma from "prisma/prisma"
 
 export async function loader() {
-  const response = await turso.execute("SELECT * FROM USUARIOS")
-
   return {
-    users: response.rows
+    users: await prisma.user.findMany()
   }
 }
 
@@ -19,20 +17,16 @@ export default function ({loaderData}: Route.ComponentProps) {
             <TableHead className="px-4 py-2 border-b">ID</TableHead>
             <TableHead className="px-4 py-2 border-b">Nome</TableHead>
             <TableHead className="px-4 py-2 border-b">Email</TableHead>
-            <TableHead className="px-4 py-2 border-b">Criado em</TableHead>
+            <TableHead className="px-4 py-2 border-b">Idade</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {loaderData?.users.map((user: any) => (
+          {loaderData?.users.map((user) => (
             <TableRow key={user.id} className="hover:bg-gray-50">
               <TableCell className="px-4 py-2 border-b">{user.id}</TableCell>
-              <TableCell className="px-4 py-2 border-b">{user.nome}</TableCell>
+              <TableCell className="px-4 py-2 border-b">{user.name}</TableCell>
               <TableCell className="px-4 py-2 border-b">{user.email}</TableCell>
-              <TableCell className="px-4 py-2 border-b">
-                {user.criado_em
-                  ? new Date(user.criado_em).toLocaleString("pt-BR")
-                  : ""}
-              </TableCell>
+              <TableCell className="px-4 py-2 border-b">{user.age}</TableCell>
             </TableRow>
           ))}
         </TableBody>

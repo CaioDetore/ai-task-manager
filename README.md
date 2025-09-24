@@ -90,4 +90,6 @@ Built with ❤️ using React Router.
 
 ```bash
 npm prisma generate
+
+npx prisma db seed
 ```
