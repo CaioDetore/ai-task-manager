@@ -1,28 +1,17 @@
-import type React from "react"
-
-import { useChat } from "@ai-sdk/react"
-import { DefaultChatTransport } from "ai"
-import { useState } from "react"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Card } from "~/components/ui/card"
 import { ScrollArea } from "~/components/ui/scroll-area"
 import { Send, Bot, User } from "lucide-react"
+import { useFetcher, useLoaderData } from "react-router"
+import { loader } from "~/routes/task-new"
 
 export default function ChatInterface() {
-  const [input, setInput] = useState("")
+  const fetcher = useFetcher()
 
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
-  })
+  const isLoading = fetcher.state !== 'idle'
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (input.trim() && status !== "streaming") {
-      sendMessage({ text: input })
-      setInput("")
-    }
-  }
+  const { chatId, messages } = useLoaderData<typeof loader>()
 
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto bg-background border rounded-xl overflow-hidden">
@@ -51,76 +40,56 @@ export default function ChatInterface() {
             </div>
           )}
 
-          {messages.map((message) => (
-            <div key={message.id} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-              {message.role === "assistant" && (
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary flex-shrink-0">
-                  <Bot className="w-4 h-4 text-primary-foreground" />
-                </div>
-              )}
-
-              <Card
-                className={`max-w-[80%] p-3 ${
-                  message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                }`}
+          {messages.map((msg: any) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`flex items-start gap-2 max-w-[70%] ${msg.role === "user"
+                    ? "flex-row-reverse"
+                    : "flex-row"
+                  }`}
               >
-                <div className="text-sm leading-relaxed">
-                  {message.parts.map((part, index) => {
-                    if (part.type === "text") {
-                      return (
-                        <div key={index} className="whitespace-pre-wrap text-pretty">
-                          {part.text}
-                        </div>
-                      )
-                    }
-                    return null
-                  })}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-primary" : "bg-muted"}`}>
+                  {msg.role === "user" ? (
+                    <User className="w-4 h-4 text-primary-foreground" />
+                  ) : (
+                    <Bot className="w-4 h-4 text-muted-foreground" />
+                  )}
                 </div>
-              </Card>
-
-              {message.role === "user" && (
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary flex-shrink-0">
-                  <User className="w-4 h-4 text-secondary-foreground" />
+                <div
+                  className={`rounded-lg px-4 py-2 text-sm ${msg.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                    }`}
+                >
+                  {msg.content}
+                  <div className="text-[10px] text-muted-foreground mt-1 text-right">
+                    {new Date(msg.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           ))}
-
-          {status === "streaming" && (
-            <div className="flex gap-3 justify-start">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary flex-shrink-0">
-                <Bot className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <Card className="bg-muted p-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                    <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                    <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-                  </div>
-                  <span className="text-sm">Thinking...</span>
-                </div>
-              </Card>
-            </div>
-          )}
         </div>
       </ScrollArea>
 
       {/* Input */}
       <div className="p-4 border-t bg-card">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <fetcher.Form action="/api/chat" method="POST" className="flex gap-2">
+          <input type="hidden" name="chatId" value={chatId ?? ""} />
           <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            name="message"
             placeholder="Type your message..."
-            disabled={status === "streaming"}
+            disabled={isLoading}
             className="flex-1 bg-input"
           />
-          <Button type="submit" disabled={!input.trim() || status === "streaming"} className="px-4">
+          <Button type="submit" disabled={isLoading} className="px-4">
             <Send className="w-4 h-4" />
             <span className="sr-only">Send message</span>
           </Button>
-        </form>
+        </fetcher.Form>
         <p className="text-xs text-muted-foreground mt-2 text-center">
           AI can make mistakes. Please verify important information.
         </p>
