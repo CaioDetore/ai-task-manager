@@ -1,6 +1,5 @@
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
-import { Card } from "~/components/ui/card"
 import { ScrollArea } from "~/components/ui/scroll-area"
 import { Send, Bot, User } from "lucide-react"
 import { useFetcher, useLoaderData } from "react-router"
@@ -40,7 +39,7 @@ export default function ChatInterface() {
             </div>
           )}
 
-          {messages.map((msg: any) => (
+          {messages.map((msg) => (
             <div
               key={msg.id}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}

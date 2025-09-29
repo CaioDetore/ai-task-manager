@@ -1,6 +1,7 @@
 import prisma from "prisma/prisma";
 import type { Route } from "./+types/api.chat";
 import { redirect } from "react-router";
+import { getChatCompletions } from "~/services/openai.server";
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
@@ -14,9 +15,9 @@ export async function action({ request }: Route.ActionArgs) {
 
   const chatMessage = {
     id: Date.now().toFixed(),
-    content: userMessage,
-    role: "user",
-    timestamp: new Date().toISOString()
+    content: userMessage as string,
+    role: "user" as const,
+    timestamp: new Date()
   }
 
   let chat
@@ -29,6 +30,13 @@ export async function action({ request }: Route.ActionArgs) {
     })
 
     if (existingChat) {
+      const answer = {
+        id: Date.now().toFixed(),
+        content: await getChatCompletions([chatMessage]) as string,
+        role: "assistant" as const,
+        timestamp: new Date()
+      }
+
       try {
         const existingMessages = JSON.parse(existingChat.content)
         chat = await prisma.chat.update({
@@ -36,7 +44,7 @@ export async function action({ request }: Route.ActionArgs) {
             id: chatId
           },
           data: {
-            content: JSON.stringify([...existingMessages, chatMessage])
+            content: JSON.stringify([...existingMessages, chatMessage, answer])
           }
         })
       } catch (error) {
@@ -48,10 +56,17 @@ export async function action({ request }: Route.ActionArgs) {
     }
   }
   else {
+    const answer = {
+      id: Date.now().toFixed(),
+      content: await getChatCompletions([chatMessage]) as string,
+      role: "assistant" as const,
+      timestamp: new Date()
+    }
+
     try {
       chat = await prisma.chat.create({
         data: {
-          content: JSON.stringify([chatMessage])
+          content: JSON.stringify([chatMessage, answer])
         }
       })
 
