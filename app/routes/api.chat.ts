@@ -26,11 +26,14 @@ export async function action({ request }: Route.ActionArgs) {
       where: {
         id: chatId
       },
+      include: {
+        messages: true
+      }
     })
 
     if (existingChat) {
       const answer = {
-        content: await getChatCompletions([chatMessage]) ?? "",
+        content: await getChatCompletions([...existingChat.messages, chatMessage]) ?? "",
         role: ChatMessageRole.assistant,
       }
 
@@ -65,7 +68,7 @@ export async function action({ request }: Route.ActionArgs) {
       await prisma.chatMessage.createMany({
         data: [
           {chat_id: chat.id, ...chatMessage},
-          {chat_id: chat.id, ...chatMessage}
+          {chat_id: chat.id, ...answer}
         ]
       })
 

@@ -65,7 +65,7 @@ export default function ChatInterface() {
                 >
                   {msg.content}
                   <div className="text-[10px] text-muted-foreground mt-1 text-right">
-                    {new Date(msg.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(msg.created_at)?.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                   </div>
                 </div>
               </div>
