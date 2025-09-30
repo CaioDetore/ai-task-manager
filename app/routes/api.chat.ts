@@ -2,6 +2,7 @@ import prisma from "prisma/prisma";
 import type { Route } from "./+types/api.chat";
 import { redirect } from "react-router";
 import { getChatCompletions } from "~/services/openai.server";
+import { ChatMessageRole } from "~/generated/prisma/enums";
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
@@ -14,10 +15,8 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const chatMessage = {
-    id: Date.now().toFixed(),
     content: userMessage as string,
-    role: "user" as const,
-    timestamp: new Date()
+    role:ChatMessageRole.user,
   }
 
   let chat
@@ -26,26 +25,21 @@ export async function action({ request }: Route.ActionArgs) {
     const existingChat = await prisma.chat.findUnique({
       where: {
         id: chatId
-      }
+      },
     })
 
     if (existingChat) {
       const answer = {
-        id: Date.now().toFixed(),
-        content: await getChatCompletions([chatMessage]) as string,
-        role: "assistant" as const,
-        timestamp: new Date()
+        content: await getChatCompletions([chatMessage]) ?? "",
+        role: ChatMessageRole.assistant,
       }
 
       try {
-        const existingMessages = JSON.parse(existingChat.content)
-        chat = await prisma.chat.update({
-          where: {
-            id: chatId
-          },
-          data: {
-            content: JSON.stringify([...existingMessages, chatMessage, answer])
-          }
+        await prisma.chatMessage.createMany({
+          data: [
+            {chat_id: existingChat.id, ...chatMessage},
+            {chat_id: existingChat.id, ...answer},
+          ]
         })
       } catch (error) {
         console.error('Erro ao processar mensagens existentes:', error)
@@ -58,16 +52,21 @@ export async function action({ request }: Route.ActionArgs) {
   else {
     const answer = {
       id: Date.now().toFixed(),
-      content: await getChatCompletions([chatMessage]) as string,
-      role: "assistant" as const,
+      content: await getChatCompletions([chatMessage]) ?? "",
+      role: ChatMessageRole.assistant,
       timestamp: new Date()
     }
 
     try {
       chat = await prisma.chat.create({
-        data: {
-          content: JSON.stringify([chatMessage, answer])
-        }
+        data: {}
+      })
+
+      await prisma.chatMessage.createMany({
+        data: [
+          {chat_id: chat.id, ...chatMessage},
+          {chat_id: chat.id, ...chatMessage}
+        ]
       })
 
       return redirect(`/task/new?chat=${chat.id}`)

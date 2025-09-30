@@ -38,7 +38,6 @@ model Post {
 model Chat {
   id         String   @id @default(uuid())
   title      String?
-  content    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -46,6 +45,26 @@ model Chat {
   task Task?
 
   @@map("chats")
+  messages ChatMessage[]
+}
+
+enum ChatMessageRole {
+  user
+  assistant
+  system
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  content    String
+  role ChatMessageRole @default(user)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  chat_id String
+  chat Chat @relation(fields: [chat_id], references: [id])
+
+  @@map("chat_messages")
 }
 
 model Task {
