@@ -1,28 +1,28 @@
 import prisma from "prisma/prisma";
 import type { Route } from "./+types/api.chat";
 import { redirect } from "react-router";
-import { getChatCompletions } from "~/services/openai.server";
+import { createChatMessages, getChatCompletions } from "~/services/chat.server";
 import { ChatMessageRole } from "~/generated/prisma/enums";
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
-  const userMessage = formData.get('message')
+  const userInput = formData.get('message')
   const chatId = formData.get('chatId') as string
 
   // Validação dos dados
-  if (!userMessage || typeof userMessage !== 'string') {
+  if (!userInput || typeof userInput !== 'string') {
     return new Response('Mensagem é obrigatória', { status: 400 })
   }
 
-  const chatMessage = {
-    content: userMessage as string,
+  const userMessage = {
+    content: userInput as string,
     role:ChatMessageRole.user,
   }
 
   let chat
 
   if (chatId) {
-    const existingChat = await prisma.chat.findUnique({
+    chat = await prisma.chat.findUnique({
       where: {
         id: chatId
       },
@@ -31,19 +31,15 @@ export async function action({ request }: Route.ActionArgs) {
       }
     })
 
-    if (existingChat) {
-      const answer = {
-        content: await getChatCompletions([...existingChat.messages, chatMessage]) ?? "",
+    if (chat) {
+      const assistantMessage = {
+        content: await getChatCompletions([...chat.messages, userMessage]) ?? "",
         role: ChatMessageRole.assistant,
       }
 
       try {
-        await prisma.chatMessage.createMany({
-          data: [
-            {chat_id: existingChat.id, ...chatMessage},
-            {chat_id: existingChat.id, ...answer},
-          ]
-        })
+        await createChatMessages(chatId, userMessage, assistantMessage)
+
       } catch (error) {
         console.error('Erro ao processar mensagens existentes:', error)
         return new Response('Erro ao processar chat existente', { status: 500 })
@@ -53,9 +49,9 @@ export async function action({ request }: Route.ActionArgs) {
     }
   }
   else {
-    const answer = {
+    const assistantMessage = {
       id: Date.now().toFixed(),
-      content: await getChatCompletions([chatMessage]) ?? "",
+      content: await getChatCompletions([userMessage]) ?? "",
       role: ChatMessageRole.assistant,
       timestamp: new Date()
     }
@@ -65,12 +61,7 @@ export async function action({ request }: Route.ActionArgs) {
         data: {}
       })
 
-      await prisma.chatMessage.createMany({
-        data: [
-          {chat_id: chat.id, ...chatMessage},
-          {chat_id: chat.id, ...answer}
-        ]
-      })
+      await createChatMessages(chatId, userMessage, assistantMessage)
 
       return redirect(`/task/new?chat=${chat.id}`)
     } catch (error) {

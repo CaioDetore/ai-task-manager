@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import prisma from 'prisma/prisma';
 import { ChatMessageRole, type ChatMessage } from '~/generated/prisma/client';
 
 const client = new OpenAI({
@@ -53,11 +54,22 @@ const systemMessage = {
   content: SYSTEM_PROMPT
 }
 
-export async function getChatCompletions(messages: { role: ChatMessageRole, content: string }[]) {
+type Message = { role: ChatMessageRole, content: string }
+
+export async function getChatCompletions(messages: Message[]) {
   const completion = await client.chat.completions.create({
     model: 'gpt-4o',
     messages: [systemMessage, ...messages]
   });
 
   return completion.choices[0].message.content;
+}
+
+export async function createChatMessages(chatId: string, chatMessage: Message, answer: Message) {
+  await prisma.chatMessage.createMany({
+    data: [
+      { chat_id: chatId, ...chatMessage },
+      { chat_id: chatId, ...answer },
+    ]
+  })
 }
