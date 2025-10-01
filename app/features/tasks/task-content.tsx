@@ -16,12 +16,12 @@ import {
 } from "lucide-react";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Button } from "~/components/ui/button";
-import { useLoaderData } from "react-router";
+import { useFetcher, useLoaderData } from "react-router";
 import { loader } from "~/routes/task-new";
 
 export default function TaskContent() {
-
-  const { task } = useLoaderData<typeof loader>()
+  const fetcher = useFetcher()
+  const { task, message_id, task_id } = useLoaderData<typeof loader>()
 
   if (!task.title) {
     return null
@@ -113,11 +113,13 @@ export default function TaskContent() {
         </div>
 
       </ScrollArea>
-      <div className="w-full flex justify-end mt-2">
-        <Button>
+      <fetcher.Form method="POST" className="w-full flex justify-end mt-2">
+        <input type="hidden" name="task_id" value={task_id} />
+        <input type="hidden" name="message_id" value={message_id} />
+        <Button type="submit" disabled={fetcher.state !== 'idle'}>
           Salvar Task
         </Button>
-      </div>
+      </fetcher.Form>
     </section>
   );
 }

@@ -14,38 +14,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  age   Int?
-  posts Post[]
-
-  @@map("users")
-}
-
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author_id Int
-  author    User    @relation(fields: [author_id], references: [id])
-
-  @@map("posts")
-}
-
 model Chat {
   id         String   @id @default(uuid())
   title      String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  // Relação opcional com Task (1:1)
-  task Task?
+  messages ChatMessage[]
 
   @@map("chats")
-  messages ChatMessage[]
 }
 
 enum ChatMessageRole {
@@ -64,6 +41,8 @@ model ChatMessage {
   chat_id String
   chat Chat @relation(fields: [chat_id], references: [id])
 
+  task Task?
+
   @@map("chat_messages")
 }
 
@@ -81,9 +60,8 @@ model Task {
   created_at                DateTime @default(now())
   updated_at                DateTime @updatedAt
 
-  // Relação obrigatória com Chat (1:1) - temporariamente opcional para migração
-  chat_id String?  @unique
-  chat    Chat? @relation(fields: [chat_id], references: [id])
+  chat_message    ChatMessage? @relation(fields: [chat_message_id], references: [id])
+  chat_message_id String?  @unique
 
   @@map("tasks")
 }
