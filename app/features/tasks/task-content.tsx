@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Button } from "~/components/ui/button";
-import { useFetcher, useLoaderData } from "react-router";
+import { Link, useFetcher, useLoaderData } from "react-router";
 import { loader } from "~/routes/task-new";
 
 export default function TaskContent() {
@@ -119,6 +119,13 @@ export default function TaskContent() {
         <Button type="submit" disabled={fetcher.state !== 'idle'}>
           Salvar Task
         </Button>
+        {!!task_id && (
+          <Button type="button">
+            <Link to={`/task/view/${task_id}`}>
+              Ver Detalhes da Tarefa
+            </Link>
+          </Button>
+        )}
       </fetcher.Form>
     </section>
   );

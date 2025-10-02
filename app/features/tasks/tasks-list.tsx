@@ -30,7 +30,9 @@ export function TaskList() {
           {data?.tasks?.map((task) => (
             <TableRow key={task.id} className="hover:bg-gray-50">
               <TableCell className="max-w-[400px] truncate px-4 py-2 border-b">{task.id}</TableCell>
-              <TableCell className="max-w-[400px] truncate px-4 py-2 border-b">{task.title}</TableCell>
+              <Link to={`/task/view/${task.id}`} className="underline underline-offset-4">
+                <TableCell className="max-w-[400px] truncate px-4 py-2 border-b">{task.title}</TableCell>
+              </Link>
               <TableCell className="px-4 py-2 border-b">{task.estimated_time}</TableCell>
               <TableCell className="px-4 py-2 border-b">{new Date(task.created_at).toLocaleString("pt-BR")}</TableCell>
               <TableCell className="px-4 py-2 border-b">{new Date(task.updated_at).toLocaleString("pt-BR")}</TableCell>

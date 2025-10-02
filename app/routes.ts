@@ -6,6 +6,7 @@ export default [
     route("tasks", "routes/tasks.tsx"),
     route("task/new", "routes/task-new.tsx"),
     route("task/edit/:id", "routes/task-edit.tsx"),
+    route("task/view/:id", "routes/task-view.tsx"),
     route("users", "routes/users.tsx")
   ]),
   route('api/chat', "routes/api.chat.ts")
