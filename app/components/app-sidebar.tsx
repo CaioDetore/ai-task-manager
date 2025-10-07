@@ -17,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar"
+import { MessageCircleCode } from "lucide-react"
 
 const data = {
   user: {
@@ -36,9 +37,9 @@ const data = {
       icon: IconListCheck,
     },
     {
-      title: "Users",
-      url: "users",
-      icon: IconUsers,
+      title: "Chats",
+      url: "/chats",
+      icon: MessageCircleCode,
     },
   ],
 }

@@ -3,6 +3,7 @@ import type { Route } from "./+types/task-new";
 import prisma from "prisma/prisma";
 import { redirect } from "react-router";
 import { ChatMessageRole, type ChatMessage } from "~/generated/prisma/client";
+import { storeTaskAsEmbeddings } from "~/services/task.server";
 
 type Task = {
   title: string;
@@ -49,10 +50,14 @@ export async function action({ request }: Route.ActionArgs) {
       },
       data: taskData
     })
+
+    await storeTaskAsEmbeddings(task_id, taskData);
   } else { 
-    await prisma.task.create({
+    const task = await prisma.task.create({
       data: taskData
     })
+
+    await storeTaskAsEmbeddings(task.id, taskData);
   }
 }
 

@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import prisma from 'prisma/prisma';
 import { ChatMessageRole, type ChatMessage } from '~/generated/prisma/client';
 
-const client = new OpenAI({
+export const client = new OpenAI({
   apiKey: process.env['OPENAI_KEY'], // This is the default and can be omitted
 });
 
